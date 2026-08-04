@@ -1,28 +1,15 @@
+import "@/styles/index.css";
+import "@/styles/index.css";
+import "@/styles/index.css";
+import "@/styles/index.css";
+import "./lib/interceptors";
+
 import React from "react";
-
-import { AppProviders } from "./app/providers";
-import { router } from "./app/router";
-import "@/styles/index.css";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
 import { AppProviders } from "./app/providers";
 import { router } from "./app/router";
-import "@/styles/index.css";
-import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-
-import { AppProviders } from "./app/providers";
-import { router } from "./app/router";
-import "@/styles/index.css";
-import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-
-import { AppProviders } from "./app/providers";
-import { router } from "./app/router";
-import "@/styles/index.css";
-import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
