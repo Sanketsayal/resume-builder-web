@@ -1,17 +1,14 @@
 import js from "@eslint/js";
-import globals from "globals";
+import prettier from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import globals from "globals";
 import tseslint from "typescript-eslint";
-import prettier from "eslint-config-prettier";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 
 export default tseslint.config(
   {
-    ignores: [
-      "dist",
-      "coverage",
-      "node_modules",
-    ],
+    ignores: ["dist", "coverage", "node_modules"],
   },
 
   js.configs.recommended,
@@ -34,9 +31,12 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "simple-import-sort": simpleImportSort,
     },
 
     rules: {
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
       ...reactHooks.configs.recommended.rules,
 
       "react-refresh/only-export-components": [
@@ -70,5 +70,5 @@ export default tseslint.config(
       curly: ["error", "all"],
     },
   },
-  prettier
+  prettier,
 );
