@@ -1,7 +1,4 @@
-import "@/styles/index.css";
-import "@/styles/index.css";
-import "@/styles/index.css";
-import "@/styles/index.css";
+import "./styles/index.css";
 import "./lib/interceptors";
 
 import React from "react";

@@ -1,11 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
 
+// import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage";
+// import RegisterPage from "@/features/auth/pages/RegisterPage";
+// import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage";
+import GuestRoute from "../components/auth/GuestRoute";
+import ProtectedRoute from "../components/auth/ProtectedRoutes";
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import RootLayout from "../layouts/RootLayout";
-import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
-import { LoginPage } from "../pages/auth/LoginPage";
-import { RegisterPage } from "../pages/auth/RegisterPage";
+import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import { NotFoundPage } from "../pages/errors/NotFoundPage";
 import { ProfilePage } from "../pages/profile/ProfilePage";
@@ -21,57 +24,77 @@ export const router = createBrowserRouter([
     errorElement: <NotFoundPage />,
 
     children: [
+      // Guest Routes
       {
-        element: <AuthLayout />,
+        element: <GuestRoute />,
 
         children: [
           {
-            path: "login",
-            element: <LoginPage />,
-          },
-          {
-            path: "register",
-            element: <RegisterPage />,
-          },
-          {
-            path: "forgot-password",
-            element: <ForgotPasswordPage />,
+            element: <AuthLayout />,
+
+            children: [
+              {
+                path: "login",
+                element: <LoginPage />,
+              },
+              // {
+              //   path: "register",
+              //   element: <RegisterPage />,
+              // },
+              // {
+              //   path: "forgot-password",
+              //   element: <ForgotPasswordPage />,
+              // },
+              // {
+              //   path: "reset-password/:token",
+              //   element: <ResetPasswordPage />,
+              // },
+            ],
           },
         ],
       },
 
+      // Protected Routes
       {
-        element: <DashboardLayout />,
+        element: <ProtectedRoute />,
 
         children: [
           {
-            index: true,
-            element: <DashboardPage />,
-          },
+            element: <DashboardLayout />,
 
-          {
-            path: "profile",
-            element: <ProfilePage />,
-          },
+            children: [
+              {
+                index: true,
+                element: <DashboardPage />,
+              },
 
-          {
-            path: "resumes",
-            element: <ResumeListPage />,
-          },
+              {
+                path: "profile",
+                element: <ProfilePage />,
+              },
 
-          {
-            path: "resumes/new",
-            element: <ResumeCreatePage />,
-          },
-
-          {
-            path: "resumes/:resumeId",
-            element: <ResumeEditorPage />,
-          },
-
-          {
-            path: "resumes/:resumeId/preview",
-            element: <ResumePreviewPage />,
+              {
+                path: "resumes",
+                children: [
+                  {
+                    index: true,
+                    element: <ResumeListPage />,
+                  },
+                  {
+                    path: "new",
+                    element: <ResumeCreatePage />,
+                  },
+                  {
+                    path: ":resumeId",
+                    element: <ResumeEditorPage />,
+                  },
+                  {
+                    path: ":resumeId/preview",
+                    element: <ResumePreviewPage />,
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
