@@ -1,6 +1,10 @@
 import { api } from "../lib/axios";
 import type { ApiResponse } from "../types/api";
-import type { LoginRequest, LoginResponse } from "../types/auth.types";
+import type {
+  LoginRequest,
+  LoginResponse,
+  ResetPasswordDto,
+} from "../types/auth.types";
 
 export async function login(body: LoginRequest) {
   const { data } = await api.post<ApiResponse<LoginResponse>>(
@@ -19,4 +23,13 @@ export async function getCurrentUser() {
 
 export async function logout() {
   await api.post("/auth/logout");
+}
+
+export async function resetPassword(dto: ResetPasswordDto) {
+  const { data } = await api.post<ApiResponse<void>>(
+    "/auth/reset-password",
+    dto,
+  );
+
+  return data.data;
 }

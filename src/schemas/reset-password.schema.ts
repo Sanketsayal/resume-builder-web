@@ -9,13 +9,9 @@ export const resetPasswordSchema = z
 
     confirmPassword: z.string(),
   })
-  .refine(
-    (data) => data.password === data.confirmPassword,
-    {
-      path: ["confirmPassword"],
-      message: "Passwords do not match",
-    },
-  );
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
-export type ResetPasswordFormData =
-  z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
