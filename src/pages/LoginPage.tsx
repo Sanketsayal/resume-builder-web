@@ -1,16 +1,32 @@
 import { useState } from "react";
+import { userLogin } from "../api/authApi";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    console.log({
-      email,
-      password,
-    });
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const result = await userLogin({
+        email,
+        password,
+      });
+
+      console.log("Login success", result);
+    } catch (error) {
+      console.error(error);
+
+      setError("Invalid email or password");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -81,8 +97,17 @@ export function LoginPage() {
               type="submit"
               className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
+
+            {error && (
+              <div
+                role="alert"
+                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
+                {error}
+              </div>
+            )}
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
