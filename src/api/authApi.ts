@@ -1,18 +1,6 @@
 import { api } from "../lib/api";
 
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface LoginResponse {
-  accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-}
+import type { LoginResponse, LoginRequest } from "../types/types";
 
 export async function userLogin(
   credentials: LoginRequest,

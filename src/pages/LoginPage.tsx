@@ -1,31 +1,29 @@
 import { useState } from "react";
-import { userLogin } from "../api/authApi";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const {isLoading, login} = useAuth();
+  const navigate = useNavigate()
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError(null);
-    setIsLoading(true);
 
     try {
-      const result = await userLogin({
+      await login({
         email,
         password,
       });
-
-      console.log("Login success", result);
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
 
       setError("Invalid email or password");
-    } finally {
-      setIsLoading(false);
     }
   }
 
