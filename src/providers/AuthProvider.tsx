@@ -1,39 +1,80 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { User, LoginRequest } from "../types/types";
 import { AuthContext } from "../context/AuthContext";
+import {
+  getCurrentUser,
+  userLogin,
+  userLogout,
+  userRefresh,
+} from "../api/authApi";
+import { clearAccessToken, setAccessToken as setToken } from "../lib/token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const isAuthenticated = user !== null;
+
+  useEffect(() => {
+    async function initializeAuth() {
+      try {
+        const response = await userRefresh();
+
+        setAccessToken(response.accessToken);
+        setToken(response.accessToken);
+
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch {
+        clearAccessToken();
+        setAccessToken(null);
+        setUser(null);
+      } finally {
+        setIsInitialized(true);
+      }
+    }
+
+    initializeAuth();
+  }, []);
 
   async function login(credentials: LoginRequest) {
     setIsLoading(true);
 
     try {
-      console.log(credentials);
+      const response = await userLogin(credentials);
 
-      const fakeUser: User = {
-        id: "1",
-        email: credentials.email,
-        name: "Sanket",
-      };
-
-      setUser(fakeUser);
+      setAccessToken(response.accessToken);
+      setToken(response.accessToken);
+      setUser(response.user);
     } finally {
       setIsLoading(false);
     }
   }
-  function logout() {
-    setUser(null);
+  async function logout() {
+    try {
+      await userLogout();
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+      clearAccessToken();
+    }
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated, login, logout }}
+      value={{
+        user,
+        isLoading,
+        isAuthenticated,
+        login,
+        logout,
+        accessToken,
+        isInitialized,
+      }}
     >
-        {children}
+      {children}
     </AuthContext.Provider>
   );
 }

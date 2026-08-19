@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role: string;
 }
 
 export interface LoginRequest {
@@ -10,6 +11,18 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  user: User;
+  success: boolean;
+  message: string;
+  data: {
+    accessToken: string;
+    user: User;
+  };
+}
+
+export interface RefreshResponse {
+  success: boolean;
+  message: string;
+  data: {
+    accessToken: string;
+  };
 }
