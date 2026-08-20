@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { AuthRedirectState } from "../types/types";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const {isLoading, login} = useAuth();
-  const navigate = useNavigate()
+  const { isLoading, login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = location.state as AuthRedirectState | null;
+
+  const redirectTo = state?.from
+    ? `${state.from.pathname}${state.from.search ?? ""}${state.from.hash ?? ""}`
+    : "/dashboard";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,7 +27,10 @@ export function LoginPage() {
         email,
         password,
       });
-      navigate("/dashboard");
+      navigate(redirectTo, {
+        replace: true,
+        state: null,
+      });
     } catch (error) {
       console.error(error);
 

@@ -8,6 +8,7 @@ import {
   userRefresh,
 } from "../api/authApi";
 import { clearAccessToken, setAccessToken as setToken } from "../lib/token";
+import { setAuthFailureHandler } from "../lib/api";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +38,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     initializeAuth();
+  }, []);
+
+  useEffect(() => {
+    setAuthFailureHandler(() => {
+      clearAccessToken();
+      setAccessToken(null);
+      setUser(null);
+    });
+
+    return () => {
+      setAuthFailureHandler(() => {});
+    };
   }, []);
 
   async function login(credentials: LoginRequest) {

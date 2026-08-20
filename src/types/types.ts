@@ -26,3 +26,11 @@ export interface RefreshResponse {
     accessToken: string;
   };
 }
+
+export interface AuthRedirectState {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+}
