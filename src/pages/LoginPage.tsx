@@ -1,49 +1,73 @@
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { PasswordInput } from "../components/ui/PasswordInput";
+
 import { useAuth } from "../hooks/useAuth";
-import { useLocation, useNavigate } from "react-router-dom";
-import type { AuthRedirectState } from "../types/types";
+import { loginSchema, type LoginFormValues } from "../validations/LoginSchema";
+
+interface LoginLocationState {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+}
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const { isLoading, login } = useAuth();
+  const { login } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  const state = location.state as AuthRedirectState | null;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+  });
+
+  const state = location.state as LoginLocationState | null;
 
   const redirectTo = state?.from
     ? `${state.from.pathname}${state.from.search ?? ""}${state.from.hash ?? ""}`
     : "/dashboard";
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError(null);
-
+  async function onSubmit(values: LoginFormValues) {
     try {
-      await login({
-        email,
-        password,
-      });
+      await login(values);
+
       navigate(redirectTo, {
         replace: true,
         state: null,
       });
-    } catch (error) {
-      console.error(error);
-
-      setError("Invalid email or password");
+    } catch {
+      // We'll improve error handling later.
     }
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-      <section className="w-full max-w-md">
-        <div className="rounded-2xl bg-white p-8 shadow-xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+    <main className="min-h-screen bg-slate-50">
+      <div className="flex min-h-screen flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-md">
+          {/* Brand */}
+          <div className="text-center">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
+                R
+              </div>
+
+              <span className="text-xl font-bold tracking-tight text-slate-900">
+                ResumeBuilder
+              </span>
+            </Link>
+
+            <h1 className="mt-8 text-2xl font-bold tracking-tight text-slate-900">
               Welcome back
             </h1>
 
@@ -52,84 +76,71 @@ export function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
-                Email
-              </label>
-
-              <input
+          {/* Card */}
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+              className="space-y-5"
+            >
+              <Input
                 id="email"
-                name="email"
+                label="Email address"
                 type="email"
                 autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                autoFocus
                 placeholder="you@example.com"
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                error={errors.email?.message}
+                {...register("email")}
               />
-            </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700"
-                >
-                  Password
-                </label>
+              <PasswordInput
+                id="password"
+                label="Password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                error={errors.password?.message}
+                {...register("password")}
+              />
 
-                <a
-                  href="/forgot-password"
+              <div className="flex justify-end">
+                <Link
+                  to="/forgot-password"
                   className="text-sm font-medium text-slate-900 hover:underline"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              />
-            </div>
+              <Button type="submit" loading={isSubmitting}>
+                Sign in
+              </Button>
+            </form>
 
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
-            >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
-
-            {error && (
-              <div
-                role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            <p className="mt-6 text-center text-sm text-slate-600">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-semibold text-slate-900 hover:underline"
               >
-                {error}
-              </div>
-            )}
-          </form>
+                Create an account
+              </Link>
+            </p>
+          </div>
 
-          <p className="mt-6 text-center text-sm text-slate-600">
-            Don't have an account?{" "}
-            <a
-              href="/register"
-              className="font-semibold text-slate-900 hover:underline"
-            >
-              Create one
-            </a>
+          <p className="mt-8 text-center text-xs text-slate-500">
+            By continuing, you agree to our{" "}
+            <Link to="/terms" className="underline hover:text-slate-700">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="underline hover:text-slate-700">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
