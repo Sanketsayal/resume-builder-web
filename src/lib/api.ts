@@ -1,18 +1,18 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import axios, {
+  type InternalAxiosRequestConfig,
+} from "axios";
 
 import { clearAccessToken, getAccessToken, setAccessToken } from "./token";
 
 import type { RefreshResponse } from "../types/types";
 
-type RetryableRequestConfig = InternalAxiosRequestConfig & {
-  _retry?: boolean;
-};
+import { normalizeError } from "./normalizeErrors";
 
 let onAuthFailure: (() => void) | null = null;
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  timeout: 10_100,
+  timeout: 10_000,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -32,7 +32,9 @@ api.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
 
-    if (accessToken) config.headers.Authorization = ` Bearer ${accessToken}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
 
     return config;
   },
@@ -64,17 +66,27 @@ function getRefreshedToken(): Promise<string> {
 api.interceptors.response.use(
   (response) => response,
 
-  async (error: AxiosError) => {
-    const originalRequest = error.config as RetryableRequestConfig | undefined;
+  async (error) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig;
 
-    if (error.response?.status !== 401 || !originalRequest) {
-      return Promise.reject(error);
+    if (!originalRequest) {
+      return Promise.reject(normalizeError(error));
+    }
+
+    if (!error.response) {
+      return Promise.reject(normalizeError(error));
+    }
+
+    if (originalRequest.skipAuthRefresh) {
+      return Promise.reject(normalizeError(error));
+    }
+
+    if (error.response.status !== 401) {
+      return Promise.reject(normalizeError(error));
     }
 
     if (originalRequest._retry) {
-      clearAccessToken();
-
-      return Promise.reject(error);
+      return Promise.reject(normalizeError(error));
     }
 
     originalRequest._retry = true;
@@ -82,14 +94,14 @@ api.interceptors.response.use(
     try {
       const newAccessToken = await getRefreshedToken();
 
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
 
       return api(originalRequest);
     } catch (refreshError) {
       clearAccessToken();
       onAuthFailure?.();
 
-      return Promise.reject(refreshError);
+      return Promise.reject(normalizeError(refreshError));
     }
   },
 );

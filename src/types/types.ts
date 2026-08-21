@@ -1,3 +1,10 @@
+import type { AxiosRequestConfig } from "axios";
+
+export interface ApiRequestConfig extends AxiosRequestConfig {
+  skipAuthRefresh?: boolean;
+  _retry?: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -34,3 +41,16 @@ export interface AuthRedirectState {
     hash?: string;
   };
 }
+
+export interface ApiSuccess<T> {
+  success: true;
+  message?: string;
+  data: T;
+}
+
+export interface ApiError {
+  success: false;
+  message: string;
+}
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiError;

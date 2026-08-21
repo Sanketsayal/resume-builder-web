@@ -8,6 +8,8 @@ import { PasswordInput } from "../components/ui/PasswordInput";
 
 import { useAuth } from "../hooks/useAuth";
 import { loginSchema, type LoginFormValues } from "../validations/LoginSchema";
+import { isAppError } from "../lib/AppErrors";
+import { useState } from "react";
 
 interface LoginLocationState {
   from?: {
@@ -22,6 +24,8 @@ export function LoginPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -46,8 +50,13 @@ export function LoginPage() {
         replace: true,
         state: null,
       });
-    } catch {
-      // We'll improve error handling later.
+    } catch (error) {
+      if (isAppError(error)) {
+        setServerError(error.message);
+        return;
+      }
+
+      setServerError("Something went wrong. Please try again.");
     }
   }
 
@@ -78,6 +87,14 @@ export function LoginPage() {
 
           {/* Card */}
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            {serverError && (
+              <div
+                role="alert"
+                className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
+                {serverError}
+              </div>
+            )}
             <form
               onSubmit={handleSubmit(onSubmit)}
               noValidate
