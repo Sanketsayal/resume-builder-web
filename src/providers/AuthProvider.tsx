@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      setAuthFailureHandler(() => {});
+      setAuthFailureHandler(null);
     };
   }, []);
 

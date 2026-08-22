@@ -1,6 +1,4 @@
-import axios, {
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 import { clearAccessToken, getAccessToken, setAccessToken } from "./token";
 
@@ -106,6 +104,6 @@ api.interceptors.response.use(
   },
 );
 
-export function setAuthFailureHandler(handler: () => void) {
+export function setAuthFailureHandler(handler: (() => void) | null) {
   onAuthFailure = handler;
 }

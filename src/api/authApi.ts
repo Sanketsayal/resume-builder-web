@@ -33,5 +33,7 @@ export async function getCurrentUser(): Promise<User> {
 }
 
 export async function userLogout(): Promise<void> {
-  await api.post("/auth/logout");
+  await api.post("/auth/logout", undefined, {
+    skipAuthRefresh: true,
+  });
 }
